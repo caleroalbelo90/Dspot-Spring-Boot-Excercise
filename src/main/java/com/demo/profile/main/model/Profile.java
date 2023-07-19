@@ -3,6 +3,10 @@ package com.demo.profile.main.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 @Entity
 @Table
 public class Profile {
@@ -35,6 +39,13 @@ public class Profile {
 
     private boolean available;
 
+    @ManyToMany
+    @JoinTable(
+            name = "friendship",
+            joinColumns = @JoinColumn(name = "profile_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id")
+    )
+    private List<Profile> friends;
 
     //region constructors
     public Profile() {}
@@ -165,5 +176,25 @@ public class Profile {
                 ", zipcode='" + zipcode + '\'' +
                 ", available=" + available +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Profile profile = (Profile) o;
+        return Objects.equals(id, profile.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    public void addFriend(Profile friend) {
+        if (friends == null) {
+            friends = new ArrayList<>();
+        }
+        friends.add(friend);
     }
 }
