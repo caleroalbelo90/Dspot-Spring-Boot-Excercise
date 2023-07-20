@@ -1,5 +1,6 @@
 package com.demo.profile.main.model;
 
+import com.demo.profile.main.repository.FriendshipRepository;
 import com.demo.profile.main.repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +26,7 @@ public class ProfileConfig {
     }
 
     @Bean
-    CommandLineRunner commandLineRunner(ProfileRepository repository) {
+    CommandLineRunner commandLineRunner(ProfileRepository repository, FriendshipRepository friendshipRepository) {
         return args -> {
 
             // Create profiles
@@ -33,7 +34,8 @@ public class ProfileConfig {
             repository.saveAll(profiles);
 
             // Create friends connections
-            createFriendsConnections(profiles, friendsTotal, repository);
+            List<Friendship> friendships = createFriendsConnections(profiles, friendsTotal);
+            friendshipRepository.saveAll(friendships);
 
         };
     }
@@ -42,7 +44,7 @@ public class ProfileConfig {
         List<Profile> profiles = new ArrayList<>();
 
         for (int i = 0; i < profilesTotal; i++) {
-            //TODO improve the way to create random profiles
+            //TODO: improve the way to create random profiles
             Profile profile = new Profile("img1.jpg", "John", "Doe", "1234567890", "123 Main St", "City1", "State1", "12345", true);
             profiles.add(profile);
         }
@@ -50,8 +52,9 @@ public class ProfileConfig {
         return profiles;
     }
 
-    private void createFriendsConnections(List<Profile> profiles, int friendsTotal, ProfileRepository repository) {
+    private List<Friendship> createFriendsConnections(List<Profile> profiles, int friendsTotal) {
         Random random = new Random();
+        List<Friendship> friendships = new ArrayList<>();
 
         for (Profile profile : profiles) {
             List<Profile> friends = new ArrayList<>(profiles);
@@ -59,15 +62,12 @@ public class ProfileConfig {
 
             for (int i = 0; i < friendsTotal; i++) {
                 int randomIndex = random.nextInt(friends.size());
-                Profile friend = friends.get(randomIndex);
-                profile.addFriend(friend);
-                friends.remove(randomIndex);
+
+                Friendship friendship = new Friendship(profile.getId(), randomIndex);
+                friendships.add(friendship);
             }
         }
-
-        repository.saveAll(profiles);
+        return friendships;
     }
-
-
 
 }

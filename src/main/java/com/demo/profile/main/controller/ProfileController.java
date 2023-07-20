@@ -32,4 +32,9 @@ public class ProfileController {
         return profileService.getProfile(profileId);
     }
 
+    @GetMapping("/{profileId1}/shortest-connection/{profileId2}")
+    public List<Long> getShortestConnection(@PathVariable Long profileId1, @PathVariable Long profileId2) {
+        return profileService.getShortestConnection(profileId1, profileId2);
+    }
+
 }

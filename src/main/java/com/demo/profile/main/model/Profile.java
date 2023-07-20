@@ -39,14 +39,6 @@ public class Profile {
 
     private boolean available;
 
-    @ManyToMany
-    @JoinTable(
-            name = "friendship",
-            joinColumns = @JoinColumn(name = "profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id")
-    )
-    private List<Profile> friends;
-
     //region constructors
     public Profile() {}
 
@@ -158,7 +150,6 @@ public class Profile {
         this.available = available;
     }
 
-
     //endregion
 
 
@@ -191,10 +182,4 @@ public class Profile {
         return Objects.hash(id);
     }
 
-    public void addFriend(Profile friend) {
-        if (friends == null) {
-            friends = new ArrayList<>();
-        }
-        friends.add(friend);
-    }
 }
