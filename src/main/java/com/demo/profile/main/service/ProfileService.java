@@ -35,6 +35,23 @@ public class ProfileService {
         throw new IllegalStateException("Profile with id " + id + " does not exists");
     }
 
+
+    /**
+     * Get the full list of friends for a given profile
+     *
+     * @param profileId id of the profile to get the friends list
+     */
+    public List<Long> getFriends(Long profileId) {
+        Optional<Profile> profileOptional = profileRepository.findById(profileId);
+
+        if (profileOptional.isPresent()) {
+             return profileRepository.getFriendsList(profileId);
+        }
+
+        throw new IllegalStateException("Profile with id " + profileId + " does not exists");
+    }
+
+
     /**
      * Get the shortest connection between two profiles
      *

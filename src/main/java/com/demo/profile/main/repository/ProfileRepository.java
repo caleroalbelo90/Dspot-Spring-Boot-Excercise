@@ -7,10 +7,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
 
+    @Query("SELECT f.friend_id FROM Friendship f WHERE f.profile_id = :profileId")
+    List<Long> getFriendsList(@Param("profileId") Long profileId);
 
 }

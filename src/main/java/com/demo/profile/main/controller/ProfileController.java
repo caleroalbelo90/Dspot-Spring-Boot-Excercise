@@ -37,4 +37,9 @@ public class ProfileController {
         return profileService.getShortestConnection(profileId1, profileId2);
     }
 
+    @GetMapping("/{profileId}/friends")
+    public List<Long> getFriends(@PathVariable Long profileId) {
+        return profileService.getFriends(profileId);
+    }
+
 }
