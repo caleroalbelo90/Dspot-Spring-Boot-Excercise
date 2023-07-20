@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static com.demo.profile.main.util.ProfileDataGenerator.generateRandomProfile;
+
 @Configuration
 public class ProfileConfig {
 
@@ -44,8 +46,7 @@ public class ProfileConfig {
         List<Profile> profiles = new ArrayList<>();
 
         for (int i = 0; i < profilesTotal; i++) {
-            //TODO: improve the way to create random profiles
-            Profile profile = new Profile("img1.jpg", "John", "Doe", "1234567890", "123 Main St", "City1", "State1", "12345", true);
+            Profile profile = generateRandomProfile();
             profiles.add(profile);
         }
 

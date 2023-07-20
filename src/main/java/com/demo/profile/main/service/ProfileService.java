@@ -45,7 +45,7 @@ public class ProfileService {
         Optional<Profile> profileOptional = profileRepository.findById(profileId);
 
         if (profileOptional.isPresent()) {
-             return profileRepository.getFriendsList(profileId);
+             return friendshipRepository.getFriendsList(profileId);
         }
 
         throw new IllegalStateException("Profile with id " + profileId + " does not exists");
