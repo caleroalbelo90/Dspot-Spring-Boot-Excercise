@@ -1,4 +1,4 @@
-package com.demo.profile.main.controller;
+package com.demo.profile.main.controllers;
 
 
 import com.demo.profile.main.model.Profile;
