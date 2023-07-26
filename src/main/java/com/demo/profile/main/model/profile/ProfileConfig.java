@@ -1,5 +1,6 @@
-package com.demo.profile.main.model;
+package com.demo.profile.main.model.profile;
 
+import com.demo.profile.main.model.Friendship;
 import com.demo.profile.main.repository.FriendshipRepository;
 import com.demo.profile.main.repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,6 @@ public class ProfileConfig {
             // Create friends connections
             List<Friendship> friendships = createFriendsConnections(profiles, friendsTotal);
             friendshipRepository.saveAll(friendships);
-
         };
     }
 

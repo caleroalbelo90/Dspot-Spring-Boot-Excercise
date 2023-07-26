@@ -2,6 +2,8 @@ package com.demo.profile.main.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "friendship", indexes = {@Index(name = "idx_profiles_profileId", columnList = "profile_id")})
 public class Friendship {
@@ -55,5 +57,27 @@ public class Friendship {
 
     public void setFriend_id(long friend_id) {
         this.friend_id = friend_id;
+    }
+
+    @Override
+    public String toString() {
+        return "Friendship{" +
+                "id=" + id +
+                ", profile_id=" + profile_id +
+                ", friend_id=" + friend_id +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Friendship that = (Friendship) o;
+        return profile_id == that.profile_id && friend_id == that.friend_id && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, profile_id, friend_id);
     }
 }

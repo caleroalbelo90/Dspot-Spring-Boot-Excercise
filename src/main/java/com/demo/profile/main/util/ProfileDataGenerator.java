@@ -1,6 +1,6 @@
 package com.demo.profile.main.util;
 
-import com.demo.profile.main.model.Profile;
+import com.demo.profile.main.model.profile.Profile;
 
 import java.util.Random;
 
