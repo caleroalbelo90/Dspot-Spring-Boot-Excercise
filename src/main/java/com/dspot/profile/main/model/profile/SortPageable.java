@@ -1,4 +1,4 @@
-package com.demo.profile.main.model.profile;
+package com.dspot.profile.main.model.profile;
 
 public class SortPageable {
     boolean empty;

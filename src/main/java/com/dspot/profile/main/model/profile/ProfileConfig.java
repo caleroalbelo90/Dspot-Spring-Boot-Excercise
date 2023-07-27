@@ -1,8 +1,9 @@
-package com.demo.profile.main.model.profile;
+package com.dspot.profile.main.model.profile;
 
-import com.demo.profile.main.model.Friendship;
-import com.demo.profile.main.repository.FriendshipRepository;
-import com.demo.profile.main.repository.ProfileRepository;
+import com.dspot.profile.main.model.Friendship;
+import com.dspot.profile.main.repository.FriendshipRepository;
+import com.dspot.profile.main.repository.ProfileRepository;
+import com.dspot.profile.main.util.ProfileDataGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -12,8 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static com.demo.profile.main.util.ProfileDataGenerator.generateRandomProfile;
 
 @Configuration
 public class ProfileConfig {
@@ -46,7 +45,7 @@ public class ProfileConfig {
         List<Profile> profiles = new ArrayList<>();
 
         for (int i = 0; i < profilesTotal; i++) {
-            Profile profile = generateRandomProfile();
+            Profile profile = ProfileDataGenerator.generateRandomProfile();
             profiles.add(profile);
         }
 

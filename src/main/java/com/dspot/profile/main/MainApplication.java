@@ -1,4 +1,4 @@
-package com.demo.profile.main;
+package com.dspot.profile.main;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;

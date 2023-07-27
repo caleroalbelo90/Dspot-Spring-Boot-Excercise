@@ -1,4 +1,4 @@
-package com.demo.profile.main.util;
+package com.dspot.profile.main.util;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;

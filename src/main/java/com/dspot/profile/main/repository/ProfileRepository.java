@@ -1,6 +1,6 @@
-package com.demo.profile.main.repository;
+package com.dspot.profile.main.repository;
 
-import com.demo.profile.main.model.profile.Profile;
+import com.dspot.profile.main.model.profile.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

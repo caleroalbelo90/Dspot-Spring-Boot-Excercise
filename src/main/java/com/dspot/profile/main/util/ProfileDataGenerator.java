@@ -1,6 +1,6 @@
-package com.demo.profile.main.util;
+package com.dspot.profile.main.util;
 
-import com.demo.profile.main.model.profile.Profile;
+import com.dspot.profile.main.model.profile.Profile;
 
 import java.util.Random;
 

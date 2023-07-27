@@ -1,4 +1,4 @@
-package com.demo.profile.main.model;
+package com.dspot.profile.main.model;
 
 import jakarta.persistence.*;
 

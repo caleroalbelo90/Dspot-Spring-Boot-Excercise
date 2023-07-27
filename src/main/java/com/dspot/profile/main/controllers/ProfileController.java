@@ -1,9 +1,9 @@
-package com.demo.profile.main.controllers;
+package com.dspot.profile.main.controllers;
 
 
-import com.demo.profile.main.model.profile.Profile;
-import com.demo.profile.main.model.profile.ProfilePage;
-import com.demo.profile.main.service.ProfileService;
+import com.dspot.profile.main.model.profile.Profile;
+import com.dspot.profile.main.model.profile.ProfilePage;
+import com.dspot.profile.main.service.ProfileServiceImp;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,11 +23,11 @@ import java.util.List;
 @RequestMapping(path = "api/v1/profile")
 public class ProfileController {
 
-    private final ProfileService profileService;
+    private final ProfileServiceImp profileService;
     int pageSize;
 
     @Autowired
-    public ProfileController(ProfileService profileService,
+    public ProfileController(ProfileServiceImp profileService,
                              @Value("${config.pageSize}") int pageSize) {
         this.profileService = profileService;
         this.pageSize = pageSize;
@@ -58,7 +58,7 @@ public class ProfileController {
                     )
             })
     public ResponseEntity<?> getAllProfiles(@RequestParam int page) {
-        return profileService.getAllProfiles(Math.max(0, page - 1), pageSize);
+        return profileService.getProfilesPage(Math.max(0, page - 1), pageSize);
     }
 
 
@@ -291,9 +291,9 @@ public class ProfileController {
     )
     public ResponseEntity<?> updateProfile(@PathVariable("profileId") Long profileId, @RequestBody Profile profile) {
         if (profile == null) {
-            return new ResponseEntity<>("Profile cannot be null", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Profile cannot be null", HttpStatus.NOT_FOUND);
         }
-        return profileService.updateStudent(profileId,
+        return profileService.updateProfile(profileId,
                 profile.getImg(),
                 profile.getFirst_name(),
                 profile.getLast_name(),

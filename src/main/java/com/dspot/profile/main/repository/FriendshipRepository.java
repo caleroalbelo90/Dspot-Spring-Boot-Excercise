@@ -1,6 +1,6 @@
-package com.demo.profile.main.repository;
+package com.dspot.profile.main.repository;
 
-import com.demo.profile.main.model.Friendship;
+import com.dspot.profile.main.model.Friendship;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -1,6 +1,6 @@
-package com.demo.profile.main.util;
+package com.dspot.profile.main.util;
 
-import com.demo.profile.main.model.ApiError;
+import com.dspot.profile.main.model.ApiError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;

@@ -19,10 +19,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	runtimeOnly 'org.postgresql:postgresql'
+
+	//Tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+	//Swagger
 	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.1.0'
 
+	//Utils
+	implementation 'com.google.code.gson:gson:2.8.9'
 }
 
 tasks.named('test') {
