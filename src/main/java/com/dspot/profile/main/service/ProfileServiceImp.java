@@ -39,16 +39,6 @@ public class ProfileServiceImp implements ProfileService {
         return optionalProfile.isPresent();
     }
 
-    /**
-     * Method to get the list of friends for a given profile
-     *
-     * @param profileId The id of the profile to check
-     * @return The list of friends for the given profile
-     */
-    private ResponseEntity<List<Long>> getFriendsList(Long profileId) {
-        return new ResponseEntity<>(friendshipRepository.getFriendsList(profileId), HttpStatus.OK);
-    }
-
     @Override
     public Page<Profile> getProfilesPage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
@@ -101,7 +91,7 @@ public class ProfileServiceImp implements ProfileService {
                 break; // We found the shortest connection
             }
 
-            List<Long> friends = getFriendsList(currentProfileId).getBody();
+            List<Long> friends = friendshipRepository.getFriendsList(currentProfileId);
 
             if (friends == null || friends.isEmpty()) {
                 continue;
