@@ -1,5 +1,7 @@
 package com.dspot.profile.main.service;
 
+import com.dspot.profile.main.errors.InvalidInputException;
+import com.dspot.profile.main.errors.ProfileNotFoundException;
 import com.dspot.profile.main.model.profile.Profile;
 import com.dspot.profile.main.repository.FriendshipRepository;
 import com.dspot.profile.main.repository.ProfileRepository;
@@ -9,11 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -52,7 +51,7 @@ public class ProfileServiceImp implements ProfileService {
         if (profileOptional.isPresent()) {
             return profileOptional.get();
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + id + " does not exist");
+            throw new ProfileNotFoundException("Profile with id " + id + " does not exist");
         }
     }
 
@@ -63,7 +62,7 @@ public class ProfileServiceImp implements ProfileService {
         if (profileOptional.isPresent()) {
             return friendshipRepository.getFriendsList(profileId);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + profileId + " does not exist");
+            throw new ProfileNotFoundException("Profile with id " + profileId + " does not exist");
         }
     }
 
@@ -121,7 +120,7 @@ public class ProfileServiceImp implements ProfileService {
     private void validateSourceAndTargetProfiles(Long sourceProfileId, Long targetProfileId) {
         // Verify both profiles are not the same
         if (Objects.equals(sourceProfileId, targetProfileId))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profiles cannot be the same");
+            throw new InvalidInputException("Profiles cannot be the same");
 
         // Verify both profiles exist
         validateExistingProfile(sourceProfileId);
@@ -130,7 +129,7 @@ public class ProfileServiceImp implements ProfileService {
 
     private void validateExistingProfile(Long profileIdToVerify) {
         if (!doesProfileExist(profileIdToVerify))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + profileIdToVerify + " does not exist");
+            throw new ProfileNotFoundException("Profile with id " + profileIdToVerify + " does not exist");
     }
 
     @Override
@@ -144,7 +143,7 @@ public class ProfileServiceImp implements ProfileService {
         boolean exists = profileRepository.existsById(profileId);
 
         if (!exists) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + profileId + " does not exist");
+            throw new ProfileNotFoundException("Profile with id " + profileId + " does not exist");
         }
 
         profileRepository.deleteById(profileId);
@@ -157,7 +156,7 @@ public class ProfileServiceImp implements ProfileService {
         Optional<Profile> existingProfile = profileRepository.findById(profileId);
 
         if (existingProfile.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + profileId + " does not exist");
+            throw new ProfileNotFoundException("Profile with id " + profileId + " does not exist");
         }
 
         Profile profileToUpdate = existingProfile.get();
