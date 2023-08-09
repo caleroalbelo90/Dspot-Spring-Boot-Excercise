@@ -2,10 +2,7 @@ package com.dspot.profile.main.model.profile;
 
 
 import jakarta.persistence.*;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 
-import java.beans.PropertyDescriptor;
 import java.util.Objects;
 
 @Entity
