@@ -3,6 +3,7 @@ package com.dspot.profile.main.service;
 import com.dspot.profile.main.model.profile.Profile;
 import com.dspot.profile.main.repository.FriendshipRepository;
 import com.dspot.profile.main.repository.ProfileRepository;
+import com.dspot.profile.main.util.ObjectUpdater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -28,19 +30,13 @@ public class ProfileServiceImp implements ProfileService {
     }
 
     /**
-     * Check if the profile exists, or throw an exception if not found
+     * Check if the profile exists in the database
      *
      * @param profileId The id of the profile to check
      */
-    private ResponseEntity<?> checkIfProfileExists(Long profileId) {
+    private boolean doesProfileExist(Long profileId) {
         Optional<Profile> optionalProfile = profileRepository.findById(profileId);
-
-        return optionalProfile.<ResponseEntity<?>>map(
-                        profile -> new ResponseEntity<>(profile, HttpStatus.OK))
-                .orElseGet(
-                        () -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("Profile with id " + profileId + " does not exist")
-                );
+        return optionalProfile.isPresent();
     }
 
     /**
@@ -63,43 +59,31 @@ public class ProfileServiceImp implements ProfileService {
     public ResponseEntity<?> getProfile(Long id) {
         Optional<Profile> profileOptional = profileRepository.findById(id);
 
-        return profileOptional.
-                <ResponseEntity<?>>map(
-                profile ->
-                        new ResponseEntity<>(profile, HttpStatus.OK))
-                .orElseGet(
-                        () -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("Profile with id " + id + " does not exist"));
+        if (profileOptional.isPresent()) {
+            return new ResponseEntity<>(profileOptional.get(), HttpStatus.OK);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + id + " does not exist");
+        }
     }
 
     @Override
     public ResponseEntity<?> getFriends(Long profileId) {
         Optional<Profile> profileOptional = profileRepository.findById(profileId);
 
-        return profileOptional.
-                <ResponseEntity<?>>map(
-                profile ->
-                        new ResponseEntity<>(friendshipRepository.getFriendsList(profileId), HttpStatus.OK))
-                .orElseGet(
-                        () -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("Profile with id " + profileId + " does not exist"));
+        if (profileOptional.isPresent()) {
+            return new ResponseEntity<>(friendshipRepository.getFriendsList(profileId), HttpStatus.OK);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + profileId + " does not exist");
+        }
     }
 
     @Override
     public ResponseEntity<?> getShortestConnection(Long sourceProfileId, Long targetProfileId) {
 
-        // Verify both profiles are not the same
-        if (Objects.equals(sourceProfileId, targetProfileId)) {
-            return new ResponseEntity<>("Profiles cannot be the same", HttpStatus.BAD_REQUEST);
-        }
+        validateSourceAndTargetProfiles(sourceProfileId, targetProfileId);
 
-        // Verify both profiles exist
-        if (checkIfProfileExists(sourceProfileId).getStatusCode() != HttpStatus.OK)
-            return checkIfProfileExists(sourceProfileId);
 
-        if (checkIfProfileExists(targetProfileId).getStatusCode() != HttpStatus.OK)
-            return checkIfProfileExists(targetProfileId);
-
+        // Determine the shortest connection
         List<Long> shortestConnection = new ArrayList<>();
 
         Set<Long> visitedProfiles = new HashSet<>();
@@ -144,87 +128,57 @@ public class ProfileServiceImp implements ProfileService {
 
     }
 
-    @Override
-    public ResponseEntity<String> registerNewProfile(Profile profile) {
-        //For now, we are not checking if the profile already exists
-        profileRepository.save(profile);
-        return ResponseEntity.ok("The request was processed successfully.");
+    private void validateSourceAndTargetProfiles(Long sourceProfileId, Long targetProfileId) {
+        // Verify both profiles are not the same
+        if (Objects.equals(sourceProfileId, targetProfileId))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profiles cannot be the same");
+
+        // Verify both profiles exist
+        validateExistingProfile(sourceProfileId);
+        validateExistingProfile(targetProfileId);
+    }
+
+    private void validateExistingProfile(Long profileIdToVerify) {
+        if (!doesProfileExist(profileIdToVerify))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + profileIdToVerify + " does not exist");
     }
 
     @Override
-    public ResponseEntity<String> deleteProfile(Long profileId) {
+    public ResponseEntity<?> registerNewProfile(Profile profile) {
+        //For now, we are not checking if the profile already exists
+        return new ResponseEntity<>(profileRepository.save(profile), HttpStatus.CREATED);
+    }
+
+    @Override
+    public void deleteProfile(Long profileId) {
         boolean exists = profileRepository.existsById(profileId);
 
         if (!exists) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile with id " + profileId + " does not exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + profileId + " does not exist");
         }
 
         profileRepository.deleteById(profileId);
-        return ResponseEntity.ok("The request was processed successfully.");
     }
 
     @Override
     @Transactional
-    public ResponseEntity<?> updateProfile(Long profileId,
-                                           String img,
-                                           String firstName,
-                                           String lastName,
-                                           String phone,
-                                           String address,
-                                           String city,
-                                           String state,
-                                           String zipcode) {
-
+    public ResponseEntity<Profile> updateProfile(Long profileId, Profile updatedProfile) {
         //First, check if the profile exists
-        Optional<Profile> optionalProfile = profileRepository.findById(profileId);
+        Optional<Profile> existingProfile = profileRepository.findById(profileId);
 
-        if (optionalProfile.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile with id " + profileId + " does not exist");
-        }
-
-        boolean someFieldChanged = false;
-        Profile profile = optionalProfile.get();
-
-        //Then, update the values only if the new values are not null and different from the current ones
-        if (img != null && img.length() > 0 && !img.equals(profile.getImg())) {
-            profile.setImg(img);
-            someFieldChanged = true;
-        }
-        if (firstName != null && firstName.length() > 0 && !firstName.equals(profile.getFirst_name())) {
-            profile.setFirst_name(firstName);
-            someFieldChanged = true;
-        }
-        if (lastName != null && lastName.length() > 0 && !lastName.equals(profile.getLast_name())) {
-            profile.setLast_name(lastName);
-            someFieldChanged = true;
-        }
-        if (phone != null && phone.length() > 0 && !phone.equals(profile.getPhone())) {
-            profile.setPhone(phone);
-            someFieldChanged = true;
-        }
-        if (address != null && address.length() > 0 && !address.equals(profile.getAddress())) {
-            profile.setAddress(address);
-            someFieldChanged = true;
-        }
-        if (city != null && city.length() > 0 && !city.equals(profile.getCity())) {
-            profile.setCity(city);
-            someFieldChanged = true;
-        }
-        if (state != null && state.length() > 0 && !state.equals(profile.getState())) {
-            profile.setState(state);
-            someFieldChanged = true;
-        }
-        if (zipcode != null && zipcode.length() > 0 && !zipcode.equals(profile.getZipcode())) {
-            profile.setZipcode(zipcode);
-            someFieldChanged = true;
+        if (existingProfile.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + profileId + " does not exist");
         }
 
-        if (someFieldChanged) {
-            profileRepository.save(profile);
-            return new ResponseEntity<>(profile, HttpStatus.OK);
+        Profile profileToUpdate = existingProfile.get();
+
+        if (!Objects.equals(profileToUpdate, updatedProfile)) {
+            //Update the profile
+            ObjectUpdater.updateFields(profileToUpdate, updatedProfile);
+            profileToUpdate = profileRepository.save(profileToUpdate);
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Nothing to update");
-
+        return new ResponseEntity<>(profileToUpdate, HttpStatus.OK);
     }
+
 }

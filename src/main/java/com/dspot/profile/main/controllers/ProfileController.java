@@ -1,9 +1,11 @@
 package com.dspot.profile.main.controllers;
 
 
+import com.dspot.profile.main.model.ApiError;
 import com.dspot.profile.main.model.profile.Profile;
 import com.dspot.profile.main.model.profile.ProfilePage;
-import com.dspot.profile.main.service.ProfileServiceImp;
+import com.dspot.profile.main.model.swagger.ProfileDTO;
+import com.dspot.profile.main.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -23,27 +26,31 @@ import java.util.List;
 @RequestMapping(path = "api/v1/profile")
 public class ProfileController {
 
-    private final ProfileServiceImp profileService;
-    int pageSize;
+    private final ProfileService profileService;
 
     @Autowired
-    public ProfileController(ProfileServiceImp profileService,
-                             @Value("${config.pageSize}") int pageSize) {
+    public ProfileController(ProfileService profileService) {
         this.profileService = profileService;
-        this.pageSize = pageSize;
     }
 
     @GetMapping
     @Operation(
             tags = {"Profile"},
-            summary = "Get all profiles",
-            description = "Get all profiles",
+            summary = "Get profiles",
+            description = "Get paged profiles in the system, if no profiles are found, an empty page will be returned",
             parameters = {
                     @Parameter(
                             name = "page",
                             description = "Page number to be loaded",
                             required = true,
                             example = "1",
+                            schema = @Schema(implementation = Integer.class)
+                    ),
+                    @Parameter(
+                            name = "pageSize",
+                            description = "Page size to be loaded",
+                            required = true,
+                            example = "10",
                             schema = @Schema(implementation = Integer.class)
                     )
             },
@@ -57,7 +64,8 @@ public class ProfileController {
                             )
                     )
             })
-    public ResponseEntity<?> getAllProfiles(@RequestParam int page) {
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> getAllProfiles(@RequestParam int page, @RequestParam int pageSize) {
         return profileService.getProfilesPage(Math.max(0, page - 1), pageSize);
     }
 
@@ -90,10 +98,20 @@ public class ProfileController {
                             description = "Profile not found",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = String.class)
+                                    schema = @Schema(implementation = ApiError.class),
+                                    examples = @ExampleObject(
+                                            value = "{\n" +
+                                                    "    \"type\": \"about:blank\",\n" +
+                                                    "    \"title\": \"Not Found\",\n" +
+                                                    "    \"status\": 404,\n" +
+                                                    "    \"detail\": \"Profile with id 72 does not exist\",\n" +
+                                                    "    \"instance\": \"/api/v1/profile/72\"\n" +
+                                                    "}"
+                                    )
                             )
                     )
             })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> getProfileById(@PathVariable("profileId") Long profileId) {
         return profileService.getProfile(profileId);
     }
@@ -101,35 +119,42 @@ public class ProfileController {
     @PostMapping
     @Operation(
             tags = {"Profile"},
-            summary = "Add new profile",
-            description = "Add a new profile",
+            summary = "Create new profile",
+            description = "Create new profile",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Profile to be added",
+                    description = "Profile to be created",
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = Profile.class)
+                            schema = @Schema(implementation = ProfileDTO.class)
                     )
             ),
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
-                            description = "Profile added",
+                            responseCode = "201",
+                            description = "Profile created",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = String.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Profile already exists",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = String.class)
+                                    schema = @Schema(implementation = Profile.class),
+                                    examples = @ExampleObject(
+                                            value = "{\n" +
+                                                    "    \"id\": 501,\n" +
+                                                    "    \"img\": \"https://example.com/profile.jpg\",\n" +
+                                                    "    \"first_name\": \"John\",\n" +
+                                                    "    \"last_name\": \"Doe\",\n" +
+                                                    "    \"phone\": \"123-456-7890\",\n" +
+                                                    "    \"address\": \"123 Main St\",\n" +
+                                                    "    \"city\": \"Exampletown\",\n" +
+                                                    "    \"state\": \"Examplestate\",\n" +
+                                                    "    \"zipcode\": \"12345\",\n" +
+                                                    "    \"available\": true\n" +
+                                                    "}"
+                                    )
                             )
                     )
             })
-    public ResponseEntity<String> registerNewProfile(@RequestBody Profile profile) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<?> registerNewProfile(@RequestBody Profile profile) {
         return profileService.registerNewProfile(profile);
     }
 
@@ -149,25 +174,31 @@ public class ProfileController {
             },
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
-                            description = "Profile deleted",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = String.class)
-                            )
+                            responseCode = "204",
+                            description = "Profile deleted"
                     ),
                     @ApiResponse(
                             responseCode = "404",
                             description = "Profile not found",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = String.class)
+                                    schema = @Schema(implementation = ApiError.class),
+                                    examples = @ExampleObject(
+                                            value = "{\n" +
+                                                    "    \"type\": \"about:blank\",\n" +
+                                                    "    \"title\": \"Not Found\",\n" +
+                                                    "    \"status\": 404,\n" +
+                                                    "    \"detail\": \"Profile with id 72 does not exist\",\n" +
+                                                    "    \"instance\": \"/api/v1/profile/72\"\n" +
+                                                    "}"
+                                    )
                             )
                     )
             }
     )
-    public ResponseEntity<String> deleteProfile(@PathVariable("profileId") Long profileId) {
-        return profileService.deleteProfile(profileId);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProfile(@PathVariable("profileId") Long profileId) {
+        profileService.deleteProfile(profileId);
     }
 
     @GetMapping("/{sourceProfileId}/shortest-connection/{targetProfileId}")
@@ -211,6 +242,7 @@ public class ProfileController {
                     )
             }
     )
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> getShortestConnection(@PathVariable Long sourceProfileId, @PathVariable Long targetProfileId) {
         return profileService.getShortestConnection(sourceProfileId, targetProfileId);
     }
@@ -245,6 +277,7 @@ public class ProfileController {
                     )
             }
     )
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> getFriends(@PathVariable Long profileId) {
         return profileService.getFriends(profileId);
     }
@@ -253,10 +286,7 @@ public class ProfileController {
     @Operation(
             tags = {"Profile"},
             summary = "Update profile",
-            description = "Update a profile only if the profile exists and if there are any changes to update:\n" +
-                    "1. The profile must exist in the system.\n" +
-                    "2. There must be some changes to update. This means that the update operation will only be performed" +
-                    " if there are modifications to any of the profile's fields. If there are no changes, the update operation should not be executed.",
+            description = "Update a profile with a given id",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Profile to be updated",
                     required = true,
@@ -277,6 +307,10 @@ public class ProfileController {
                     @ApiResponse(
                             responseCode = "404",
                             description = "Profile not found"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Profile cannot be null"
                     )
             },
             parameters = {
@@ -289,18 +323,8 @@ public class ProfileController {
                     )
             }
     )
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> updateProfile(@PathVariable("profileId") Long profileId, @RequestBody Profile profile) {
-        if (profile == null) {
-            return new ResponseEntity<>("Profile cannot be null", HttpStatus.NOT_FOUND);
-        }
-        return profileService.updateProfile(profileId,
-                profile.getImg(),
-                profile.getFirst_name(),
-                profile.getLast_name(),
-                profile.getPhone(),
-                profile.getAddress(),
-                profile.getCity(),
-                profile.getState(),
-                profile.getZipcode());
+        return profileService.updateProfile(profileId, profile);
     }
 }

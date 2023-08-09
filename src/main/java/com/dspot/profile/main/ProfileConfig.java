@@ -1,6 +1,7 @@
-package com.dspot.profile.main.model.profile;
+package com.dspot.profile.main;
 
 import com.dspot.profile.main.model.Friendship;
+import com.dspot.profile.main.model.profile.Profile;
 import com.dspot.profile.main.repository.FriendshipRepository;
 import com.dspot.profile.main.repository.ProfileRepository;
 import com.dspot.profile.main.util.ProfileDataGenerator;

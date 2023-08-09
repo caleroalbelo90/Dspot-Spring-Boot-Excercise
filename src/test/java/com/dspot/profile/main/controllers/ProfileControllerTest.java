@@ -145,15 +145,7 @@ public class ProfileControllerTest {
 
         // Assert
         verify(profileService, times(1))
-                .updateProfile(18L,
-                        profile.getImg(),
-                        profile.getFirst_name(),
-                        profile.getLast_name(),
-                        profile.getPhone(),
-                        profile.getAddress(),
-                        profile.getCity(),
-                        profile.getState(),
-                        profile.getZipcode());
+                .updateProfile(18L, profile);
     }
 
 }

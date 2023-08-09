@@ -2,7 +2,10 @@ package com.dspot.profile.main.model.profile;
 
 
 import jakarta.persistence.*;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
+import java.beans.PropertyDescriptor;
 import java.util.Objects;
 
 @Entity
@@ -63,6 +66,11 @@ public class Profile {
         this.state = state;
         this.zipcode = zipcode;
         this.available = available;
+    }
+
+    public Profile(String firstName, String lastName) {
+        this.first_name = firstName;
+        this.last_name = lastName;
     }
     //endregion
 
@@ -179,5 +187,6 @@ public class Profile {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 
 }

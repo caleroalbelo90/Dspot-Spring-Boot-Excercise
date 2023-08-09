@@ -3,9 +3,7 @@ package com.dspot.profile.main.service;
 import com.dspot.profile.main.model.profile.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
-@Service
 public interface ProfileService {
 
     /**
@@ -44,35 +42,21 @@ public interface ProfileService {
      *
      * @param profile profile to register
      */
-    ResponseEntity<String> registerNewProfile(Profile profile);
+    ResponseEntity<?> registerNewProfile(Profile profile);
 
     /**
      * Delete a profile
      *
      * @param profileId id of the profile to delete
      */
-    ResponseEntity<String> deleteProfile(Long profileId);
+    void deleteProfile(Long profileId);
 
     /**
      * Update a profile
      *
      * @param profileId id of the profile to update
-     * @param img profile image
-     * @param firstName profile first name
-     * @param lastName profile last name
-     * @param phone profile phone
-     * @param address profile address
-     * @param city profile city
-     * @param state profile state
-     * @param zipcode profile zipcode
+     * @param profile       profile to update
+     * @return the updated profile
      */
-    ResponseEntity<?> updateProfile(Long profileId,
-                                    String img,
-                                    String firstName,
-                                    String lastName,
-                                    String phone,
-                                    String address,
-                                    String city,
-                                    String state,
-                                    String zipcode);
+    ResponseEntity<Profile> updateProfile(Long profileId, Profile profile);
 }

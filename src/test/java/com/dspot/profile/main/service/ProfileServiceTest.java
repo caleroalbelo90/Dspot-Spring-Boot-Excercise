@@ -194,10 +194,10 @@ class ProfileServiceTest {
                 true);
 
         // Act
-        ResponseEntity<String> response = profileService.registerNewProfile(newProfile);
+        ResponseEntity<?> response = profileService.registerNewProfile(newProfile);
 
         // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("The request was processed successfully.", response.getBody());
         Mockito.verify(profileRepositoryMock, Mockito.times(1)).save(newProfile);
     }
@@ -253,7 +253,7 @@ class ProfileServiceTest {
         ProfileService profileService = new ProfileServiceImp(profileRepositoryMock, null);
 
         // Act
-        ResponseEntity<?> response = profileService.updateProfile(existingProfileId, null, "Jane", "Smith", null, null, null, null, null);
+        ResponseEntity<?> response = profileService.updateProfile(existingProfileId, new Profile("Jane", "Smith"));
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -281,7 +281,7 @@ class ProfileServiceTest {
         ProfileService profileService = new ProfileServiceImp(profileRepositoryMock, null);
 
         // Act
-        ResponseEntity<?> response = profileService.updateProfile(existingProfileId, null, null, null, null, null, null, null, null);
+        ResponseEntity<?> response = profileService.updateProfile(existingProfileId, null);
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -297,7 +297,7 @@ class ProfileServiceTest {
         ProfileService profileService = new ProfileServiceImp(profileRepositoryMock, null);
 
         // Act
-        ResponseEntity<?> response = profileService.updateProfile(nonExistingProfileId, null, "Jane", "Smith", null, null, null, null, null);
+        ResponseEntity<?> response = profileService.updateProfile(nonExistingProfileId, new Profile("Jane", "Smith"));
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
