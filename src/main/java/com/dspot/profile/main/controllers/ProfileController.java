@@ -13,12 +13,11 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -65,10 +64,9 @@ public class ProfileController {
                     )
             })
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> getAllProfiles(@RequestParam int page, @RequestParam int pageSize) {
+    public Page<Profile> getAllProfiles(@RequestParam int page, @RequestParam int pageSize) {
         return profileService.getProfilesPage(Math.max(0, page - 1), pageSize);
     }
-
 
     @GetMapping(path = "{profileId}")
     @Operation(
@@ -112,7 +110,7 @@ public class ProfileController {
                     )
             })
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> getProfileById(@PathVariable("profileId") Long profileId) {
+    public Profile getProfileById(@PathVariable("profileId") Long profileId) {
         return profileService.getProfile(profileId);
     }
 
@@ -154,7 +152,7 @@ public class ProfileController {
                     )
             })
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> registerNewProfile(@RequestBody Profile profile) {
+    public Profile registerNewProfile(@RequestBody Profile profile) {
         return profileService.registerNewProfile(profile);
     }
 
@@ -243,7 +241,7 @@ public class ProfileController {
             }
     )
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> getShortestConnection(@PathVariable Long sourceProfileId, @PathVariable Long targetProfileId) {
+    public List<Long> getShortestConnection(@PathVariable Long sourceProfileId, @PathVariable Long targetProfileId) {
         return profileService.getShortestConnection(sourceProfileId, targetProfileId);
     }
 
@@ -278,7 +276,7 @@ public class ProfileController {
             }
     )
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> getFriends(@PathVariable Long profileId) {
+    public List<Long> getFriends(@PathVariable Long profileId) {
         return profileService.getFriends(profileId);
     }
 
@@ -324,7 +322,7 @@ public class ProfileController {
             }
     )
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> updateProfile(@PathVariable("profileId") Long profileId, @RequestBody Profile profile) {
+    public Profile updateProfile(@PathVariable("profileId") Long profileId, @RequestBody Profile profile) {
         return profileService.updateProfile(profileId, profile);
     }
 }

@@ -1,8 +1,11 @@
 package com.dspot.profile.main.service;
 
 import com.dspot.profile.main.model.profile.Profile;
+import com.dspot.profile.main.model.swagger.ProfileDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 public interface ProfileService {
 
@@ -12,21 +15,21 @@ public interface ProfileService {
      * @param page page number
      * @param size size number of elements per page
      */
-    ResponseEntity<Page<Profile>> getProfilesPage(int page, int size);
+    Page<Profile> getProfilesPage(int page, int size);
 
     /**
      * Get a profile by id
      *
      * @param id id of the profile to get
      */
-    ResponseEntity<?> getProfile(Long id);
+    Profile getProfile(Long id);
 
     /**
      * Get the full list of friends for a given profile
      *
      * @param profileId id of the profile to get the friends list
      */
-    ResponseEntity<?> getFriends(Long profileId);
+    List<Long> getFriends(Long profileId);
 
 
     /**
@@ -35,14 +38,14 @@ public interface ProfileService {
      * @param sourceProfileId Starting profile
      * @param targetProfileId Profile to connect to
      */
-    ResponseEntity<?> getShortestConnection(Long sourceProfileId, Long targetProfileId);
+    List<Long> getShortestConnection(Long sourceProfileId, Long targetProfileId);
 
     /**
      * Register a new profile
      *
      * @param profile profile to register
      */
-    ResponseEntity<?> registerNewProfile(Profile profile);
+    Profile registerNewProfile(Profile profile);
 
     /**
      * Delete a profile
@@ -58,5 +61,5 @@ public interface ProfileService {
      * @param profile       profile to update
      * @return the updated profile
      */
-    ResponseEntity<Profile> updateProfile(Long profileId, Profile profile);
+    Profile updateProfile(Long profileId, Profile profile);
 }

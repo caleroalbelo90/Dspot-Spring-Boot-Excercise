@@ -50,35 +50,35 @@ public class ProfileServiceImp implements ProfileService {
     }
 
     @Override
-    public ResponseEntity<Page<Profile>> getProfilesPage(int page, int size) {
+    public Page<Profile> getProfilesPage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-        return new ResponseEntity<>(profileRepository.findAll(pageable), HttpStatus.OK);
+        return profileRepository.findAll(pageable);
     }
 
     @Override
-    public ResponseEntity<?> getProfile(Long id) {
+    public Profile getProfile(Long id) {
         Optional<Profile> profileOptional = profileRepository.findById(id);
 
         if (profileOptional.isPresent()) {
-            return new ResponseEntity<>(profileOptional.get(), HttpStatus.OK);
+            return profileOptional.get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + id + " does not exist");
         }
     }
 
     @Override
-    public ResponseEntity<?> getFriends(Long profileId) {
+    public List<Long> getFriends(Long profileId) {
         Optional<Profile> profileOptional = profileRepository.findById(profileId);
 
         if (profileOptional.isPresent()) {
-            return new ResponseEntity<>(friendshipRepository.getFriendsList(profileId), HttpStatus.OK);
+            return friendshipRepository.getFriendsList(profileId);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile with id " + profileId + " does not exist");
         }
     }
 
     @Override
-    public ResponseEntity<?> getShortestConnection(Long sourceProfileId, Long targetProfileId) {
+    public List<Long> getShortestConnection(Long sourceProfileId, Long targetProfileId) {
 
         validateSourceAndTargetProfiles(sourceProfileId, targetProfileId);
 
@@ -124,7 +124,7 @@ public class ProfileServiceImp implements ProfileService {
             }
         }
 
-        return new ResponseEntity<>(shortestConnection, HttpStatus.OK);
+        return shortestConnection;
 
     }
 
@@ -144,9 +144,9 @@ public class ProfileServiceImp implements ProfileService {
     }
 
     @Override
-    public ResponseEntity<?> registerNewProfile(Profile profile) {
+    public Profile registerNewProfile(Profile profile) {
         //For now, we are not checking if the profile already exists
-        return new ResponseEntity<>(profileRepository.save(profile), HttpStatus.CREATED);
+        return profileRepository.save(profile);
     }
 
     @Override
@@ -162,7 +162,7 @@ public class ProfileServiceImp implements ProfileService {
 
     @Override
     @Transactional
-    public ResponseEntity<Profile> updateProfile(Long profileId, Profile updatedProfile) {
+    public Profile updateProfile(Long profileId, Profile updatedProfile) {
         //First, check if the profile exists
         Optional<Profile> existingProfile = profileRepository.findById(profileId);
 
@@ -178,7 +178,7 @@ public class ProfileServiceImp implements ProfileService {
             profileToUpdate = profileRepository.save(profileToUpdate);
         }
 
-        return new ResponseEntity<>(profileToUpdate, HttpStatus.OK);
+        return profileToUpdate;
     }
 
 }
