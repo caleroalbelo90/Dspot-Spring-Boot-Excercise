@@ -1,9 +1,8 @@
 package com.dspot.profile.main.service;
 
 import com.dspot.profile.main.model.profile.Profile;
-import com.dspot.profile.main.model.swagger.ProfileDTO;
+import com.dspot.profile.main.model.profile.ProfileDTO;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 

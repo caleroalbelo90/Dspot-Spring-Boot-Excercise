@@ -1,4 +1,4 @@
-package com.dspot.profile.main.model.swagger;
+package com.dspot.profile.main.model.profile;
 
 
 public class ProfileDTO {

@@ -3,8 +3,8 @@ package com.dspot.profile.main.controllers;
 
 import com.dspot.profile.main.model.ApiError;
 import com.dspot.profile.main.model.profile.Profile;
+import com.dspot.profile.main.model.profile.ProfileDTO;
 import com.dspot.profile.main.model.profile.ProfilePage;
-import com.dspot.profile.main.model.swagger.ProfileDTO;
 import com.dspot.profile.main.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,8 +63,9 @@ public class ProfileController {
                     )
             })
     @ResponseStatus(HttpStatus.OK)
-    public Page<Profile> getAllProfiles(@RequestParam int page, @RequestParam int pageSize) {
-        return profileService.getProfilesPage(Math.max(0, page - 1), pageSize);
+    public ProfilePage getAllProfiles(@RequestParam int page, @RequestParam int pageSize) {
+        Page<Profile> profilesPage = profileService.getProfilesPage(Math.max(0, page - 1), pageSize);
+        return new ProfilePage(profilesPage.getContent(), profilesPage.isLast(), profilesPage.getNumberOfElements(), profilesPage.isEmpty());
     }
 
     @GetMapping(path = "{profileId}")
@@ -88,7 +88,7 @@ public class ProfileController {
                             description = "Profile found",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Profile.class)
+                                    schema = @Schema(implementation = ProfileDTO.class)
                             )
                     ),
                     @ApiResponse(
@@ -110,8 +110,9 @@ public class ProfileController {
                     )
             })
     @ResponseStatus(HttpStatus.OK)
-    public Profile getProfileById(@PathVariable("profileId") Long profileId) {
-        return profileService.getProfile(profileId);
+    public ProfileDTO getProfileById(@PathVariable("profileId") Long profileId) {
+        Profile profile = profileService.getProfile(profileId);
+        return convertToDto(profile);
     }
 
     @PostMapping
@@ -133,10 +134,9 @@ public class ProfileController {
                             description = "Profile created",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Profile.class),
+                                    schema = @Schema(implementation = ProfileDTO.class),
                                     examples = @ExampleObject(
                                             value = "{\n" +
-                                                    "    \"id\": 501,\n" +
                                                     "    \"img\": \"https://example.com/profile.jpg\",\n" +
                                                     "    \"first_name\": \"John\",\n" +
                                                     "    \"last_name\": \"Doe\",\n" +
@@ -152,8 +152,8 @@ public class ProfileController {
                     )
             })
     @ResponseStatus(HttpStatus.CREATED)
-    public Profile registerNewProfile(@RequestBody Profile profile) {
-        return profileService.registerNewProfile(profile);
+    public ProfileDTO registerNewProfile(@RequestBody ProfileDTO profile) {
+        return convertToDto(profileService.registerNewProfile(convertToEntity(profile)));
     }
 
     @DeleteMapping(path = "{profileId}")
@@ -299,7 +299,7 @@ public class ProfileController {
                             description = "Profile updated",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Profile.class)
+                                    schema = @Schema(implementation = ProfileDTO.class)
                             )
                     ),
                     @ApiResponse(
@@ -322,7 +322,35 @@ public class ProfileController {
             }
     )
     @ResponseStatus(HttpStatus.OK)
-    public Profile updateProfile(@PathVariable("profileId") Long profileId, @RequestBody Profile profile) {
-        return profileService.updateProfile(profileId, profile);
+    public ProfileDTO updateProfile(@PathVariable("profileId") Long profileId, @RequestBody ProfileDTO profile) {
+        return convertToDto(profileService.updateProfile(profileId, convertToEntity(profile)));
+    }
+
+
+    private ProfileDTO convertToDto(Profile profile) {
+        ProfileDTO dto = new ProfileDTO();
+        dto.setFirst_name(profile.getFirst_name());
+        dto.setLast_name(profile.getLast_name());
+        dto.setImg(profile.getImg());
+        dto.setAddress(profile.getAddress());
+        dto.setCity(profile.getCity());
+        dto.setZipcode(profile.getZipcode());
+        dto.setPhone(profile.getPhone());
+        dto.setAvailable(profile.isAvailable());
+        dto.setState(profile.getState());
+
+        return dto;
+    }
+
+    private Profile convertToEntity(ProfileDTO profile) {
+        return new Profile(profile.getImg(),
+                profile.getFirst_name(),
+                profile.getLast_name(),
+                profile.getPhone(),
+                profile.getAddress(),
+                profile.getCity(),
+                profile.getState(),
+                profile.getZipcode(),
+                profile.isAvailable());
     }
 }

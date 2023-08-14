@@ -4,8 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 public class ProfileNotFoundException extends ResponseStatusException {
-
-    public ProfileNotFoundException(String message) {
-        super(HttpStatus.NOT_FOUND, message);
+    public ProfileNotFoundException(Long profileId) {
+        super(HttpStatus.NOT_FOUND, "Profile with id " + profileId + " does not exist");
     }
 }

@@ -9,5 +9,4 @@ public class CustomError {
         this.message = message;
     }
 
-    // Getters y setters
 }

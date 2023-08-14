@@ -28,16 +28,6 @@ public class ProfileServiceImp implements ProfileService {
         this.friendshipRepository = friendshipRepository;
     }
 
-    /**
-     * Check if the profile exists in the database
-     *
-     * @param profileId The id of the profile to check
-     */
-    private boolean doesProfileExist(Long profileId) {
-        Optional<Profile> optionalProfile = profileRepository.findById(profileId);
-        return optionalProfile.isPresent();
-    }
-
     @Override
     public Page<Profile> getProfilesPage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
@@ -45,14 +35,9 @@ public class ProfileServiceImp implements ProfileService {
     }
 
     @Override
-    public Profile getProfile(Long id) {
-        Optional<Profile> profileOptional = profileRepository.findById(id);
-
-        if (profileOptional.isPresent()) {
-            return profileOptional.get();
-        } else {
-            throw new ProfileNotFoundException("Profile with id " + id + " does not exist");
-        }
+    public Profile getProfile(Long profileId) {
+        return profileRepository.findById(profileId)
+                .orElseThrow(() -> new ProfileNotFoundException(profileId));
     }
 
     @Override
@@ -61,16 +46,14 @@ public class ProfileServiceImp implements ProfileService {
 
         if (profileOptional.isPresent()) {
             return friendshipRepository.getFriendsList(profileId);
-        } else {
-            throw new ProfileNotFoundException("Profile with id " + profileId + " does not exist");
         }
+
+        throw new ProfileNotFoundException(profileId);
     }
 
     @Override
     public List<Long> getShortestConnection(Long sourceProfileId, Long targetProfileId) {
-
         validateSourceAndTargetProfiles(sourceProfileId, targetProfileId);
-
 
         // Determine the shortest connection
         List<Long> shortestConnection = new ArrayList<>();
@@ -114,60 +97,43 @@ public class ProfileServiceImp implements ProfileService {
         }
 
         return shortestConnection;
-
-    }
-
-    private void validateSourceAndTargetProfiles(Long sourceProfileId, Long targetProfileId) {
-        // Verify both profiles are not the same
-        if (Objects.equals(sourceProfileId, targetProfileId))
-            throw new InvalidInputException("Profiles cannot be the same");
-
-        // Verify both profiles exist
-        validateExistingProfile(sourceProfileId);
-        validateExistingProfile(targetProfileId);
-    }
-
-    private void validateExistingProfile(Long profileIdToVerify) {
-        if (!doesProfileExist(profileIdToVerify))
-            throw new ProfileNotFoundException("Profile with id " + profileIdToVerify + " does not exist");
     }
 
     @Override
     public Profile registerNewProfile(Profile profile) {
-        //For now, we are not checking if the profile already exists
         return profileRepository.save(profile);
     }
 
     @Override
     public void deleteProfile(Long profileId) {
-        boolean exists = profileRepository.existsById(profileId);
-
-        if (!exists) {
-            throw new ProfileNotFoundException("Profile with id " + profileId + " does not exist");
-        }
-
-        profileRepository.deleteById(profileId);
+        profileRepository.findById(profileId).ifPresentOrElse(
+                profile -> profileRepository.deleteById(profileId),
+                () -> { throw new ProfileNotFoundException(profileId); }
+        );
     }
 
     @Override
     @Transactional
     public Profile updateProfile(Long profileId, Profile updatedProfile) {
-        //First, check if the profile exists
-        Optional<Profile> existingProfile = profileRepository.findById(profileId);
+        Profile profileToUpdate = profileRepository.findById(profileId)
+                .orElseThrow(() -> new ProfileNotFoundException(profileId));
 
-        if (existingProfile.isEmpty()) {
-            throw new ProfileNotFoundException("Profile with id " + profileId + " does not exist");
+        // Update the profile
+        ObjectUpdater.updateFields(profileToUpdate, updatedProfile);
+
+        return profileRepository.save(profileToUpdate);
+    }
+
+    private void validateSourceAndTargetProfiles(Long sourceProfileId, Long targetProfileId) {
+        if (Objects.equals(sourceProfileId, targetProfileId)) {
+            throw new InvalidInputException("Profiles cannot be the same");
         }
 
-        Profile profileToUpdate = existingProfile.get();
+        profileRepository.findById(sourceProfileId)
+                .orElseThrow(() -> new ProfileNotFoundException(sourceProfileId));
 
-        if (!Objects.equals(profileToUpdate, updatedProfile)) {
-            //Update the profile
-            ObjectUpdater.updateFields(profileToUpdate, updatedProfile);
-            profileToUpdate = profileRepository.save(profileToUpdate);
-        }
-
-        return profileToUpdate;
+        profileRepository.findById(targetProfileId)
+                .orElseThrow(() -> new ProfileNotFoundException(targetProfileId));
     }
 
 }
