@@ -1,12 +1,19 @@
 package com.dspot.profile.main.model.profile;
 
 
+import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.Length;
+
 public class ProfileDTO {
 
     private String img;
 
+    @NotBlank(message = "First name is required")
+    @Length(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
     private String first_name;
 
+    @NotBlank(message = "Last name is required")
+    @Length(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
     private String last_name;
 
     private String phone;

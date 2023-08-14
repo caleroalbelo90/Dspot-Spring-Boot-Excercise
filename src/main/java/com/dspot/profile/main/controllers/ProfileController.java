@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -152,7 +153,7 @@ public class ProfileController {
                     )
             })
     @ResponseStatus(HttpStatus.CREATED)
-    public ProfileDTO registerNewProfile(@RequestBody ProfileDTO profile) {
+    public ProfileDTO registerNewProfile(@RequestBody @Valid ProfileDTO profile) {
         return convertToDto(profileService.registerNewProfile(convertToEntity(profile)));
     }
 

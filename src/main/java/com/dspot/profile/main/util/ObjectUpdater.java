@@ -24,7 +24,7 @@ public class ObjectUpdater {
                         Object sourceValue = sourceReadMethod.invoke(source);
                         Object targetValue = targetDescriptor.getReadMethod().invoke(target);
 
-                        if (sourceValue != null && !sourceValue.equals(targetValue)) {
+                        if (sourceValue != null && !sourceValue.equals(targetValue) && !sourceValue.toString().trim().isEmpty()) {
                             targetWriteMethod.invoke(target, sourceValue);
                         }
                     } catch (Exception e) {
